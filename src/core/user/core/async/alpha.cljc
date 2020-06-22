@@ -5,10 +5,11 @@
    [clojure.core.async.impl.channels :as async.channels]
    [taoensso.timbre :as timbre]
    [user.timbre.alpha :as u.timbre]
-   [user.java.lang.runtime :as java.runtime]
+   #?(:clj [user.java.lang.runtime :as java.runtime])
    )
   (:import
-   clojure.core.async.impl.channels.ManyToManyChannel
+   #?@(:clj
+       [clojure.core.async.impl.channels.ManyToManyChannel])
    ))
 
 
@@ -38,7 +39,7 @@
        (do
          (try
            (consume v)
-           (catch Throwable e (ex-handler e)))
+           (catch #?(:clj Throwable :cljs js/Error) e (ex-handler e)))
          (recur))
        (do
          (u.timbre/debug-halt consume)
@@ -67,7 +68,7 @@
        (do
          (try
            (consume v)
-           (catch Throwable e (ex-handler e)))
+           (catch #?(:clj Throwable :cljs js/Error) e (ex-handler e)))
          (recur))
        (do
          (u.timbre/debug-halt consume)
@@ -79,39 +80,40 @@
        (async/close! sub-ch)))))
 
 
-(defn pipelined-subscription-proc
-  {:style/indent [0]}
-  ([pub topic from consume]
-   (pipelined-subscription-proc
-     pub topic from consume identity (fn [_]) (+ (java.runtime/available-processors) 2) (async/chan) (fn [])))
-  ([pub topic from consume xf]
-   (pipelined-subscription-proc
-     pub topic from consume xf (fn [_]) (+ (java.runtime/available-processors) 2) (async/chan) (fn [])))
-  ([pub topic from consume xf ex-handler]
-   (pipelined-subscription-proc
-     pub topic from consume xf ex-handler (+ (java.runtime/available-processors) 2) (async/chan) (fn [])))
-  ([pub topic from consume xf ex-handler n]
-   (pipelined-subscription-proc pub topic from consume xf ex-handler n (async/chan) (fn [])))
-  ([pub topic from consume xf ex-handler n out]
-   (pipelined-subscription-proc pub topic from consume xf ex-handler n out (fn [])))
-  ([pub topic from consume xf ex-handler n out on-close]
-   {:pre [(chan? from)
-          (chan? out)
-          (fn? consume) (fn? ex-handler) (fn? on-close)]}
-   (async/pipeline n out xf from true ex-handler)
-   (async/go-loop []
-     (if-let [v (async/<! out)]
-       (do
-         (consume v)
-         (recur))
-       (do
-         (u.timbre/debug-halt consume)
-         (on-close))))
-   (async/sub pub topic from)
-   (reify async.impl/Channel
-     (close! [_]
-       (async/unsub pub topic from)
-       (async/close! from)))))
+#?(:clj
+   (defn pipelined-subscription-proc
+     {:style/indent [0]}
+     ([pub topic from consume]
+      (pipelined-subscription-proc
+        pub topic from consume identity (fn [_]) (+ (java.runtime/available-processors) 2) (async/chan) (fn [])))
+     ([pub topic from consume xf]
+      (pipelined-subscription-proc
+        pub topic from consume xf (fn [_]) (+ (java.runtime/available-processors) 2) (async/chan) (fn [])))
+     ([pub topic from consume xf ex-handler]
+      (pipelined-subscription-proc
+        pub topic from consume xf ex-handler (+ (java.runtime/available-processors) 2) (async/chan) (fn [])))
+     ([pub topic from consume xf ex-handler n]
+      (pipelined-subscription-proc pub topic from consume xf ex-handler n (async/chan) (fn [])))
+     ([pub topic from consume xf ex-handler n out]
+      (pipelined-subscription-proc pub topic from consume xf ex-handler n out (fn [])))
+     ([pub topic from consume xf ex-handler n out on-close]
+      {:pre [(chan? from)
+             (chan? out)
+             (fn? consume) (fn? ex-handler) (fn? on-close)]}
+      (async/pipeline n out xf from true ex-handler)
+      (async/go-loop []
+        (if-let [v (async/<! out)]
+          (do
+            (consume v)
+            (recur))
+          (do
+            (u.timbre/debug-halt consume)
+            (on-close))))
+      (async/sub pub topic from)
+      (reify async.impl/Channel
+        (close! [_]
+          (async/unsub pub topic from)
+          (async/close! from))))))
 
 
 (defn sticky-batch-proc*
@@ -170,13 +172,13 @@
         (fn [acc]
           (try
             (batch-task acc)
-            (catch Throwable e
+            (catch #?(:clj Throwable :cljs js/Error) e
               (timbre/error e))))
         :on-exit
         (fn []
           (try
             (on-exit)
-            (catch Throwable e
+            (catch #?(:clj Throwable :cljs js/Error) e
               (timbre/error e))))))))
 
 
@@ -230,11 +232,11 @@
         (fn [acc]
           (try
             (batch-task acc)
-            (catch Throwable e
+            (catch #?(:clj Throwable :cljs js/Error) e
               (timbre/error e))))
         :on-exit
         (fn []
           (try
             (on-exit)
-            (catch Throwable e
+            (catch #?(:clj Throwable :cljs js/Error) e
               (timbre/error e))))))))

@@ -3,7 +3,7 @@
  {
   user.clojure.lang {:mvn/version "2020.164.33190"}
   user.java.lang    {:mvn/version "2020.164.33984"}
-  user.timbre       {:mvn/version "2020.164.37388"}
+  user.timbre       {:mvn/version "2020.174.28103"}
   }
  :aliases
  {
