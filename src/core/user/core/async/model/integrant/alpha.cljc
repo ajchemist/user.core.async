@@ -98,7 +98,7 @@
                     n          (java.runtime/available-processors)
                     out        (async/chan)
                     on-close   (pipelined-subscription--default-on-close ident)
-                    on-init    (pipelined-subscription--default-init-callback ident)}}]
+                    on-init    (pipelined-subscription--default-on-init ident)}}]
      (let [sub-proc (user.async/pipelined-subscription-proc pub topic sub-ch consume xf ex-handler n out on-close)]
        (on-init)
        sub-proc)))
