@@ -5,7 +5,8 @@
    [taoensso.timbre :as timbre]
    [user.timbre.alpha :as u.timbre]
    [user.core.async.alpha :as user.async]
-   [user.java.lang.runtime :as java.runtime]
+   #?(:clj
+      [user.java.lang.runtime :as java.runtime])
    ))
 
 
