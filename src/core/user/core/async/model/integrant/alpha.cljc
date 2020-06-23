@@ -87,21 +87,20 @@
 
 (defn pipelined-subscription--default-ex-handler [ident] (fn [_]))
 (defn pipelined-subscription--default-on-close [ident] (fn [] (u.timbre/info-halt (u.timbre/ident ident))))
-(defn pipelined-subscription--default-init-callback [ident] (fn [] (u.timbre/info-init (u.timbre/ident ident))))
+(defn pipelined-subscription--default-on-init [ident] (fn [] (u.timbre/info-init (u.timbre/ident ident))))
 
 
 #?(:clj
    (defmethod ig/init-key ::pipelined-subscription
-     [ident {:keys [pub topic sub-ch consume xf ex-handler n out on-close
-                    init-callback]
-             :or   {xf            identity
-                    ex-handler    (pipelined-subscription--default-ex-handler ident)
-                    n             (java.runtime/available-processors)
-                    out           (async/chan)
-                    on-close      (pipelined-subscription--default-on-close ident)
-                    init-callback (pipelined-subscription--default-init-callback ident)}}]
-     (let [sub-proc (pipelined-subscription-proc pub topic sub-ch consume xf ex-handler n out on-close)]
-       (init-callback)
+     [ident {:keys [pub topic sub-ch consume xf ex-handler n out on-close on-init]
+             :or   {xf         identity
+                    ex-handler (pipelined-subscription--default-ex-handler ident)
+                    n          (java.runtime/available-processors)
+                    out        (async/chan)
+                    on-close   (pipelined-subscription--default-on-close ident)
+                    on-init    (pipelined-subscription--default-init-callback ident)}}]
+     (let [sub-proc (user.async/pipelined-subscription-proc pub topic sub-ch consume xf ex-handler n out on-close)]
+       (on-init)
        sub-proc)))
 
 
