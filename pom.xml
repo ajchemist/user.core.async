@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>user.core.async</groupId>
+  <artifactId>user.core.async</artifactId>
+  <version>2020.167.58342</version>
+  <dependencies>
+    <dependency>
+      <groupId>user.clojure.lang</groupId>
+      <artifactId>user.clojure.lang</artifactId>
+      <version>2020.164.33190</version>
+    </dependency>
+    <dependency>
+      <groupId>user.java.lang</groupId>
+      <artifactId>user.java.lang</artifactId>
+      <version>2020.164.33984</version>
+    </dependency>
+    <dependency>
+      <groupId>user.timbre</groupId>
+      <artifactId>user.timbre</artifactId>
+      <version>2020.164.37388</version>
+    </dependency>
+  </dependencies>
+  <repositories>
+    <repository>
+      <id>clojars</id>
+      <url>https://repo.clojars.org/</url>
+    </repository>
+  </repositories>
+  <build>
+    <sourceDirectory>src/core</sourceDirectory>
+  </build>
+</project>
