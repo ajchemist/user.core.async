@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>user.core.async</groupId>
   <artifactId>user.core.async</artifactId>
-  <version>2020.175.21735</version>
+  <version>2020.175.25012</version>
   <dependencies>
     <dependency>
       <groupId>user.clojure.lang</groupId>
