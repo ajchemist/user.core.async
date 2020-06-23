@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>user.core.async</groupId>
   <artifactId>user.core.async</artifactId>
-  <version>2020.167.58342</version>
+  <version>2020.175.21735</version>
   <dependencies>
     <dependency>
       <groupId>user.clojure.lang</groupId>
@@ -19,7 +19,7 @@
     <dependency>
       <groupId>user.timbre</groupId>
       <artifactId>user.timbre</artifactId>
-      <version>2020.164.37388</version>
+      <version>2020.175.17058</version>
     </dependency>
   </dependencies>
   <repositories>
