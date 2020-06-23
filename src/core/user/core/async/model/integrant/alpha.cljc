@@ -9,6 +9,26 @@
    ))
 
 
+(defmethod ig/init-key ::mult
+  [_ chan]
+  (async/mult chan))
+
+
+(defmethod ig/halt-key! ::mult
+  [_ mult]
+  (async/untap-all mult)
+  (async/close! (async/muxch* mult)))
+
+
+(defmethod ig/init-key ::mult-putter
+  [_ mult]
+  #(async/put! (async/muxch* mult) %))
+
+
+(defmethod ig/halt-key! ::mult-putter
+  [_ mult])
+
+
 (defmethod ig/init-key ::pub
   [ident {:keys [chan topic-fn buf-fn] :or {buf-fn (constantly nil)}}]
   {:pre [(ifn? topic-fn) (ifn? buf-fn)]}
@@ -22,19 +42,38 @@
 ;;
 
 
+(defn tap--default-ex-handler [ident] (fn [_]))
+(defn tap--default-on-close [ident] (fn [] (u.timbre/info-halt (u.timbre/ident ident))))
+(defn tap--default-on-init [ident] (fn [] (u.timbre/info-init (u.timbre/ident ident))))
+
+
+(defmethod ig/init-key ::tap
+  [ident {:keys [mult tap-ch consume ex-handler on-close on-init]
+          :or   {ex-handler (tap--default-ex-handler ident)
+                 on-close   (tap--default-on-close ident)
+                 on-init    (tap--default-on-init ident)}}]
+  (let [tap-proc (user.async/tap-proc mult tap-ch consume ex-handler on-close)]
+    (on-init)
+    tap-proc))
+
+
+(defmethod ig/halt-key! ::tap
+  [ident tap-proc]
+  (async/close! tap-proc))
+
+
 (defn subscription--default-ex-handler [ident] (fn [_]))
 (defn subscription--default-on-close [ident] (fn [] (u.timbre/info-halt (u.timbre/ident ident))))
-(defn subscription--default-init-callback [ident] (fn [] (u.timbre/info-init (u.timbre/ident ident))))
+(defn subscription--default-on-init [ident] (fn [] (u.timbre/info-init (u.timbre/ident ident))))
 
 
 (defmethod ig/init-key ::subscription
-  [ident {:keys [pub topic sub-ch consume ex-handler on-close
-                 init-callback]
-          :or   {ex-handler    (subscription--default-ex-handler ident)
-                 on-close      (subscription--default-on-close ident)
-                 init-callback (subscription--default-init-callback ident)}}]
+  [ident {:keys [pub topic sub-ch consume ex-handler on-close on-init]
+          :or   {ex-handler (subscription--default-ex-handler ident)
+                 on-close   (subscription--default-on-close ident)
+                 on-init    (subscription--default-on-init ident)}}]
   (let [sub-proc (user.async/subscription-proc pub topic sub-ch consume ex-handler on-close)]
-    (init-callback)
+    (on-init)
     sub-proc))
 
 

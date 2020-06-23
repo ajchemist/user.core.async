@@ -20,15 +20,15 @@
        (satisfies? async.impl/WritePort x)))
 
 
-(defn tab-proc
+(defn tap-proc
   "return proc type of `async.impl/Channel`
 
   proc can be deleted with (async/close! proc)"
   {:style/indent [0]}
   ([mult ch consume]
-   (tab-proc mult ch consume (fn [_]) (fn [])))
+   (tap-proc mult ch consume (fn [_]) (fn [])))
   ([mult ch consume ex-handler]
-   (tab-proc mult ch consume ex-handler (fn [])))
+   (tap-proc mult ch consume ex-handler (fn [])))
   ([mult ch consume ex-handler on-close]
    {:pre [(chan? ch)
           (fn? consume)
