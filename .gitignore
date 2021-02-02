@@ -1,3 +1,5 @@
+.obsolete
+.clj-kondo/.cache
 .cpcache
 .nrepl-port
 .eastwood

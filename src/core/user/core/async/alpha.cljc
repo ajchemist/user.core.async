@@ -2,14 +2,7 @@
   (:require
    [clojure.core.async :as async]
    [clojure.core.async.impl.protocols :as async.impl]
-   [clojure.core.async.impl.channels :as async.channels]
-   [taoensso.timbre :as timbre]
-   [user.timbre.alpha :as u.timbre]
    #?(:clj [user.java.lang.runtime :as java.runtime])
-   )
-  (:import
-   #?@(:clj
-       [clojure.core.async.impl.channels.ManyToManyChannel])
    ))
 
 
@@ -41,9 +34,7 @@
            (consume v)
            (catch #?(:clj Throwable :cljs js/Error) e (ex-handler e)))
          (recur))
-       (do
-         (u.timbre/debug-halt consume)
-         (on-close))))
+       (on-close)))
    (async/tap mult ch)
    (reify async.impl/Channel
      (close! [_]
@@ -70,9 +61,7 @@
            (consume v)
            (catch #?(:clj Throwable :cljs js/Error) e (ex-handler e)))
          (recur))
-       (do
-         (u.timbre/debug-halt consume)
-         (on-close))))
+       (on-close)))
    (async/sub pub topic sub-ch)
    (reify async.impl/Channel
      (close! [_]
@@ -106,9 +95,7 @@
           (do
             (consume v)
             (recur))
-          (do
-            (u.timbre/debug-halt consume)
-            (on-close))))
+          (on-close)))
       (async/sub pub topic from)
       (reify async.impl/Channel
         (close! [_]
@@ -162,7 +149,7 @@
 
 (defn sticky-batch-proc
   {:style/indent [0]}
-  [{:keys [batch-task on-exit] :as opts}]
+  [{:keys [batch-task on-error on-exit] :as opts}]
   {:pre [(fn? batch-task)
          (fn? on-exit)]}
   (sticky-batch-proc*
@@ -173,13 +160,13 @@
           (try
             (batch-task acc)
             (catch #?(:clj Throwable :cljs js/Error) e
-              (timbre/error e))))
+              (on-error e))))
         :on-exit
         (fn []
           (try
             (on-exit)
             (catch #?(:clj Throwable :cljs js/Error) e
-              (timbre/error e))))))))
+              (on-error e))))))))
 
 
 (defn lazy-batch-proc*
@@ -222,7 +209,7 @@
 
 (defn lazy-batch-proc
   {:style/indent [0]}
-  [{:keys [batch-task on-exit] :as opts}]
+  [{:keys [batch-task on-error on-exit] :as opts}]
   {:pre [(fn? batch-task)
          (fn? on-exit)]}
   (lazy-batch-proc*
@@ -233,10 +220,10 @@
           (try
             (batch-task acc)
             (catch #?(:clj Throwable :cljs js/Error) e
-              (timbre/error e))))
+              (on-error e))))
         :on-exit
         (fn []
           (try
             (on-exit)
             (catch #?(:clj Throwable :cljs js/Error) e
-              (timbre/error e))))))))
+              (on-error e))))))))
