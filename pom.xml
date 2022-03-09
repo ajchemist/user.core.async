@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>user.core.async</groupId>
+  <groupId>io.github.ajchemist</groupId>
   <artifactId>user.core.async</artifactId>
-  <version>2021.33.44974</version>
+  <version>2022.68.22260</version>
   <dependencies>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>clojure</artifactId>
+      <version>1.10.3</version>
+    </dependency>
     <dependency>
       <groupId>user.clojure.lang</groupId>
       <artifactId>user.clojure.lang</artifactId>
@@ -26,4 +30,8 @@
   <build>
     <sourceDirectory>src/core</sourceDirectory>
   </build>
+  <name>user.core.async</name>
+  <scm>
+    <url>https://github.com/ajchemist/user.core.async</url>
+  </scm>
 </project>
