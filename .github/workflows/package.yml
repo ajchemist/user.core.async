@@ -1,11 +1,26 @@
-name: Main CI
+name: Package CI
 
 
 on:
   push:
-    branches: [ master ]
+    paths:
+      - '.github/workflows/package.yml'
+      - 'deps.edn'
+      - 'build/package.clj'
+      - 'src/core/**/*.clj'
+      - 'src/core/**/*.cljs'
+      - 'src/core/**/*.cljc'
+    branches:
+      - master
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
+
+
+env:
+  clojure-cli: "1.10.3.1087"
+  java-version: "17"
+  library: io.github.ajchemist/user.core.async
 
 
 jobs:
@@ -14,9 +29,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        java: [ "8", "11" ]
-        clojure: [ "1.9", "1.10" ]
-    name: test @ JDK = ${{ matrix.java }} CLJ = ${{ matrix.clojure }}
+        clojure: [ "1.10" ]
+    name: test @ CLJ = ${{ matrix.clojure }}
     steps:
       - uses: actions/checkout@v2
       - name: Cache local maven repository
@@ -36,21 +50,28 @@ jobs:
 
 
       - name: Setup java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: ${{ matrix.java }}
-
-
+          distribution: 'zulu'
+          java-version: ${{ env.java-version }}
       - name: Set up clojure-cli
-        uses: DeLaGuardo/setup-clojure@master
+        uses: DeLaGuardo/setup-clojure@3.7
         with:
-          cli: '1.10.2.774'
+          cli: ${{ env.clojure-cli }}
 
 
       - name: Test runner
         run: |
-          clojure -M:${{ matrix.clojure }}:provided:test:test-runner
-          clojure -M:${{ matrix.clojure }}:provided:test:cljs-test-runner
+          clojure -M:provided:test:test-runner
+          clojure -M:provided:test:cljs-test-runner
+
+
+      - name: Discord action job digest notification
+        if: always() # Pick up events even if the job fails or is canceled.
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: sarisia/actions-status-discord@v1
+
 
 
   package:
@@ -76,11 +97,10 @@ jobs:
 
       # This reset settings.xml
       - name: Setup java
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v2
         with:
-          java-version: 11
-
-
+          distribution: 'zulu'
+          java-version: ${{ env.java-version }}
       - name: Preparation
         run: |
           cp .ci/settings.xml $HOME/.m2/
@@ -88,15 +108,14 @@ jobs:
 
 
       - name: Set up clojure-cli
-        uses: DeLaGuardo/setup-clojure@master
+        uses: DeLaGuardo/setup-clojure@3.7
         with:
-          cli: '1.10.2.774'
+          cli: ${{ env.clojure-cli }}
 
 
       - name: Make package
-        env:
-          LIBRARY: user.core.async
-        run: clojure -M:1.10:provided:test -m user.tools.deps.script.package -r $LIBRARY
+        run: |
+          clojure -T:build jar :lib ${{ env.library }}
 
 
       - name: Deploy
@@ -110,17 +129,14 @@ jobs:
         run: |
           git config --local user.name "ajchemist"
           git config --local user.email "1694505+ajchemist@users.noreply.github.com"
-          git add -u -- pom.xml
-          git commit -m "$(clojure -M:provided:test -m user.apache.maven.script.get-pom-version) [ci skip]"
+          git add -- pom.xml
+          git commit -m "$(clojure -X:build:maven-tool print-pom-version) [ci skip]"
           git remote -v
           git push
 
 
-      - uses: 8398a7/action-slack@v3.5.0
-        with:
-          status: ${{ job.status }}
-          fields: repo,message,commit,author,action,eventName,ref,workflow,job,took # selectable (default: repo,message)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # optional
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+      - name: Discord action job digest notification
         if: always() # Pick up events even if the job fails or is canceled.
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        uses: sarisia/actions-status-discord@v1

@@ -1,4 +1,5 @@
 .obsolete
+.lsp/.cache
 .clj-kondo/.cache
 .cpcache
 .nrepl-port
