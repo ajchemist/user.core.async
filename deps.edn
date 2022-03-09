@@ -49,6 +49,11 @@
    :ns-default build.package}
 
 
+  :maven-tool
+  {:extra-deps {io.github.ajchemist/user.apache.maven.alpha {:git/sha "4f70a7a6ed4ab0620c7a0a3a4caf95d33ef916c6"}}
+   :ns-default user.apache.maven.api}
+
+
   :eastwood
   {:extra-deps {jonase/eastwood {:mvn/version "RELEASE"}}
    :main-opts  ["-m" "eastwood.lint" {:source-paths ["src/core"] :test-paths ["src/test"]}]}
